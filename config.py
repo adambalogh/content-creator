@@ -1,8 +1,5 @@
 """Configuration for the OG Content Creator agent."""
 
-from dataclasses import dataclass, field
-from pathlib import Path
-
 # ---------------------------------------------------------------------------
 # GitHub repos to monitor.  Each entry maps a friendly *product name* to one
 # or more GitHub "owner/repo" strings.  PRs from repos that share a product
@@ -37,21 +34,3 @@ LOOKBACK_DAYS: dict[str, int] = {
     "daily": 1,
     "weekly": 14,
 }
-
-# ---------------------------------------------------------------------------
-# Content style settings
-# ---------------------------------------------------------------------------
-MAX_TWEET_LENGTH = 280
-MAX_THREAD_POSTS = 4  # max posts in an X thread
-
-
-@dataclass
-class ContentConfig:
-    """Runtime configuration built from CLI args + env."""
-
-    frequency: str = "weekly"  # "daily" or "weekly"
-    lookback_days: int = 14
-    github_token: str = ""
-    anthropic_api_key: str = ""
-    output_file: Path | None = None  # if set, write content to this file
-    products: dict[str, list[str]] = field(default_factory=lambda: PRODUCTS.copy())

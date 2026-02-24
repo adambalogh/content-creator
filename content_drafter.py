@@ -1,13 +1,18 @@
-"""Use the Claude Agent SDK to draft holistic X posts from aggregated GitHub changes."""
+"""Use the Claude Agent SDK with the GitHub MCP server to scan repos and draft X posts."""
 
 from __future__ import annotations
 
 import asyncio
+import os
+from datetime import datetime, timedelta, timezone
 
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, query
 
+from config import PRODUCTS
 
-SYSTEM_PROMPT = """\
+
+def _build_system_prompt() -> str:
+    return """\
 You are the content analyst for OpenGradient.
 
 ABOUT OPENGRADIENT:
@@ -27,16 +32,23 @@ Every inference includes cryptographic attestation proving which models and
 prompts were used, enabling transparent, auditable AI agent actions.
 
 YOUR JOB:
-Translate recent GitHub activity into high-level product updates that a human
-content writer will use to draft X (Twitter) posts.
+1. Use the GitHub MCP tools to scan the specified repositories for recent merged
+   pull requests and releases.
+2. Synthesize the activity into high-level product updates that a human content
+   writer will use to draft X (Twitter) posts.
 
-RULES:
-1. You will receive raw GitHub activity (PRs, releases) grouped by product.
-2. Produce one or more holistic summary per product.  Synthesize all changes into a
+SCANNING INSTRUCTIONS:
+- For each repo, use the GitHub tools to list recently merged pull requests and
+  releases within the lookback window.
+- Group findings by product (multiple repos may belong to one product).
+- Focus on user-facing changes — skip minor internal fixes.
+
+OUTPUT RULES:
+1. Produce one or more holistic summary per product.  Synthesize all changes into a
    cohesive product update — what users can now do, what got better.
-3. Write for a general crypto/AI-curious audience.  Keep it high-level.
-4. If a release is included, mention the version number.
-5. Output ONLY the summaries using this format — no additional notes, no
+2. Write for a general crypto/AI-curious audience.  Keep it high-level.
+3. If a release is included, mention the version number.
+4. Output ONLY the summaries using this format — no additional notes, no
    commentary about what was left out, no writer instructions:
 
    === <Product Name> ===
@@ -44,31 +56,56 @@ RULES:
    Why it matters: <one line on why a user/developer should care>
    Suggested angle: <what makes this interesting to post about>
 
-6. If there are no meaningful user-facing changes, just say "No notable updates."
-7. Do not highlight low-level technical changes or internal improvements or small bug fixes.
+5. If there are no meaningful user-facing changes for a product, say "No notable updates."
+6. Do not highlight low-level technical changes or internal improvements or small bug fixes.
 """
 
 
-async def draft_content(changes_text: str) -> str:
-    """Send the aggregated changes to Claude and return the drafted posts.
+def _build_prompt(lookback_days: int) -> str:
+    since = datetime.now(timezone.utc) - timedelta(days=lookback_days)
+    since_str = since.strftime("%Y-%m-%d")
+
+    repo_list = "\n".join(
+        f"  - Product: {product}\n    Repos: {', '.join(repos)}"
+        for product, repos in PRODUCTS.items()
+    )
+
+    return (
+        f"Scan the following GitHub repos for merged PRs and releases since {since_str} "
+        f"(last {lookback_days} days). Then summarize the notable changes per product "
+        f"so a human can draft X posts.\n\n"
+        f"Products and repos:\n{repo_list}"
+    )
+
+
+async def draft_content(lookback_days: int) -> str:
+    """Use the GitHub MCP server to scan repos and draft X post summaries.
 
     Args:
-        changes_text: pre-formatted text block of product changes.
+        lookback_days: how many days back to look for activity.
 
     Returns:
-        The drafted X posts as a single string.
+        The drafted X post summaries as a single string.
     """
-    prompt = (
-        "Here are the recent GitHub changes for OpenGradient, grouped by product.\n"
-        "Summarize the notable changes per product so a human can draft X posts.\n\n"
-        f"{changes_text}"
-    )
-
     options = ClaudeAgentOptions(
-        system_prompt=SYSTEM_PROMPT,
-        max_turns=1,
+        system_prompt=_build_system_prompt(),
+        mcp_servers={
+            "github": {
+                "command": "docker",
+                "args": [
+                    "run", "-i", "--rm",
+                    "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+                    "ghcr.io/github/github-mcp-server",
+                ],
+                "env": {
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": os.environ.get("GITHUB_TOKEN", ""),
+                },
+            },
+        },
+        allowed_tools=["mcp__github__*"],
     )
 
+    prompt = _build_prompt(lookback_days)
     result_parts: list[str] = []
 
     async for message in query(prompt=prompt, options=options):
@@ -78,11 +115,13 @@ async def draft_content(changes_text: str) -> str:
                     result_parts.append(block.text)
         elif isinstance(message, ResultMessage):
             if message.is_error:
-                raise RuntimeError(f"Agent error after {message.num_turns} turns: {message.result}")
+                raise RuntimeError(
+                    f"Agent error after {message.num_turns} turns: {message.result}"
+                )
 
     return "\n".join(result_parts)
 
 
-def draft_content_sync(changes_text: str) -> str:
-    """Synchronous wrapper around draft_content for convenience."""
-    return asyncio.run(draft_content(changes_text))
+def draft_content_sync(lookback_days: int) -> str:
+    """Synchronous wrapper around draft_content."""
+    return asyncio.run(draft_content(lookback_days))
