@@ -35,7 +35,7 @@ PRODUCTS: dict[str, list[str]] = {
 # "daily" → 1 day, "weekly" → 7 days.  Override via CLI.
 LOOKBACK_DAYS: dict[str, int] = {
     "daily": 1,
-    "weekly": 7,
+    "weekly": 14,
 }
 
 # ---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ class ContentConfig:
     """Runtime configuration built from CLI args + env."""
 
     frequency: str = "weekly"  # "daily" or "weekly"
-    lookback_days: int = 7
+    lookback_days: int = 14
     github_token: str = ""
     anthropic_api_key: str = ""
     output_file: Path | None = None  # if set, write content to this file

@@ -32,7 +32,7 @@ content writer will use to draft X (Twitter) posts.
 
 RULES:
 1. You will receive raw GitHub activity (PRs, releases) grouped by product.
-2. Produce ONE holistic summary per product.  Synthesize all changes into a
+2. Produce one or more holistic summary per product.  Synthesize all changes into a
    cohesive product update — what users can now do, what got better.
 3. Write for a general crypto/AI-curious audience.  Keep it high-level.
 4. If a release is included, mention the version number.
@@ -45,6 +45,7 @@ RULES:
    Suggested angle: <what makes this interesting to post about>
 
 6. If there are no meaningful user-facing changes, just say "No notable updates."
+7. Do not highlight low-level technical changes or internal improvements or small bug fixes.
 """
 
 
