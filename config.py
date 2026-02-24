@@ -10,15 +10,15 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 PRODUCTS: dict[str, list[str]] = {
     # Example — replace with real OpenGradient repos:
-    "OpenGradient Protocol": [
-        "OpenGradient/protocol-core",
+    "OpenGradient Blockchain": [
+        "OpenGradient/og-evm",
     ],
     "OpenGradient SDK": [
-        "OpenGradient/sdk-python",
-        "OpenGradient/sdk-js",
+        "OpenGradient/OpenGradient-SDK",
     ],
-    "OpenGradient Hub": [
-        "OpenGradient/hub",
+    "OpenGradient x402 Inference": [
+        "OpenGradient/x402",
+        "OpenGradient/tee-gateway",
     ],
 }
 
