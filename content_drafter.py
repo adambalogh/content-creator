@@ -91,14 +91,10 @@ async def draft_content(lookback_days: int) -> str:
         system_prompt=_build_system_prompt(),
         mcp_servers={
             "github": {
-                "command": "docker",
-                "args": [
-                    "run", "-i", "--rm",
-                    "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-                    "ghcr.io/github/github-mcp-server",
-                ],
-                "env": {
-                    "GITHUB_PERSONAL_ACCESS_TOKEN": os.environ.get("GITHUB_TOKEN", ""),
+                "type": "http",
+                "url": "https://api.githubcopilot.com/mcp/",
+                "headers": {
+                    "Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN', '')}",
                 },
             },
         },

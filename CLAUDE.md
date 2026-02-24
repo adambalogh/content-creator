@@ -19,14 +19,14 @@ uv run python main.py --output posts.txt     # write to file instead of stdout
 uv sync                                      # install/update deps from uv.lock
 ```
 
-Requires a `.env` file with `GITHUB_TOKEN` and `ANTHROPIC_API_KEY`. The GitHub MCP server runs via Docker, so Docker must be running.
+Requires a `.env` file with `GITHUB_TOKEN` and `ANTHROPIC_API_KEY`. Uses the remote GitHub MCP server — no Docker needed.
 
 ## Architecture
 
 Three files, ~230 lines total:
 
 - **main.py** — CLI entry point. Parses args, validates env vars, calls `draft_content_sync()`, handles output.
-- **content_drafter.py** — Core logic. Builds system/user prompts, configures the GitHub MCP server (Docker-based), calls `claude_agent_sdk.query()` to stream agent responses. The agent uses MCP tools (`mcp__github__*`) to scan repos for PRs and releases.
+- **content_drafter.py** — Core logic. Builds system/user prompts, configures the remote GitHub MCP server, calls `claude_agent_sdk.query()` to stream agent responses. The agent uses MCP tools (`mcp__github__*`) to scan repos for PRs and releases.
 - **config.py** — Static data: `PRODUCTS` maps product names to GitHub repos (grouped so multiple repos roll up into one product update), `LOOKBACK_DAYS` maps frequency strings to day counts.
 
 The agent SDK handles all GitHub API interaction through the MCP server — there is no direct GitHub API code in this repo.
