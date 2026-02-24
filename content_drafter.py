@@ -42,8 +42,6 @@ RULES:
    === <Product Name> ===
    What's new: <1-3 sentences a general audience would understand>
    Why it matters: <one line on why a user/developer should care>
-   ELI5 context: <one plain-English sentence explaining the technical area
-                   so the content person doesn't need to ask an engineer>
    Suggested angle: <what makes this interesting to post about>
 
 6. If there are no meaningful user-facing changes, just say "No notable updates."
