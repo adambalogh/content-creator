@@ -9,17 +9,26 @@ from pathlib import Path
 # name are aggregated into a single holistic update.
 # ---------------------------------------------------------------------------
 PRODUCTS: dict[str, list[str]] = {
-    # Example — replace with real OpenGradient repos:
     "OpenGradient Blockchain": [
         "OpenGradient/og-evm",
     ],
     "OpenGradient SDK": [
-        "OpenGradient/OpenGradient-SDK",
+        "OpenGradient/OpenGradient-SDK"
     ],
-    "OpenGradient x402 Inference": [
+    "OpenGradient Verifiable Inference": [
         "OpenGradient/x402",
         "OpenGradient/tee-gateway",
+        "OpenGradient/llm-server",
+        "OpenGradient/inference-facilitator"
     ],
+    "OpenGradient MemSync": [
+        "OpenGradient/memsync",
+        "OpenGradient/mem-chat-api",
+    ],
+    "BitQuant": [
+        "OpenGradient/bitquant",
+        "OpenGradient/bitquant-app"
+    ]
 }
 
 # How far back (in days) to look for merged PRs / releases.
