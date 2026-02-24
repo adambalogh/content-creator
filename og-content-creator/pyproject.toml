@@ -1,0 +1,11 @@
+[project]
+name = "og-content-creator"
+version = "0.1.0"
+description = "Propose X posts from OpenGradient's latest GitHub activity using Claude Agent SDK"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "claude-agent-sdk>=0.1.41",
+    "pygithub>=2.8.1",
+    "python-dotenv>=1.2.1",
+]
